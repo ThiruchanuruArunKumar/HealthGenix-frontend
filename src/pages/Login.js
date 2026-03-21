@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import API from '../api';
+import { auth, googleProvider, signInWithPopup } from '../firebase';
 
 function Login() {
   const navigate = useNavigate();
@@ -21,6 +22,24 @@ function Login() {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setError('');
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const res = await API.post('/auth/google', {
+        name: user.displayName,
+        email: user.email,
+        googleId: user.uid
+      });
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      navigate('/dashboard');
+    } catch (error) {
+      setError('Google sign in failed. Please try again.');
     }
   };
 
@@ -57,10 +76,8 @@ function Login() {
         label { font-size:13px; font-weight:600; color:#4A5B5E; margin-bottom:6px; display:block; letter-spacing:0.3px; }
       `}</style>
 
-      {/* Card */}
       <div style={{background:'white',borderRadius:'32px',padding:'48px',width:'100%',maxWidth:'440px',boxShadow:'0 20px 35px -12px rgba(0,0,0,0.08)',border:'1px solid #EFE6DC'}}>
 
-        {/* Logo */}
         <div style={{textAlign:'center',marginBottom:'32px'}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'10px',marginBottom:'20px',cursor:'pointer'}} onClick={() => navigate('/')}>
             <div style={{width:'40px',height:'40px',background:'#2A5C4A',borderRadius:'14px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'800',fontSize:'18px'}}>H</div>
@@ -70,14 +87,12 @@ function Login() {
           <p style={{color:'#8F9B96',fontSize:'14px'}}>Sign in to your health dashboard</p>
         </div>
 
-        {/* Error */}
         {error && (
           <div style={{background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:'12px',padding:'12px 16px',marginBottom:'20px',fontSize:'13px',color:'#DC2626',textAlign:'center'}}>
             {error}
           </div>
         )}
 
-        {/* Form */}
         <div style={{display:'flex',flexDirection:'column',gap:'18px'}}>
           <div>
             <label>Email address</label>
@@ -104,7 +119,7 @@ function Login() {
             <div style={{flex:1,height:'1px',background:'#EFE6DC'}}></div>
           </div>
 
-          <button className="btn-google">
+          <button className="btn-google" onClick={handleGoogleLogin}>
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -115,7 +130,6 @@ function Login() {
           </button>
         </div>
 
-        {/* Register link */}
         <p style={{textAlign:'center',marginTop:'24px',fontSize:'14px',color:'#8F9B96'}}>
           Don't have an account?{' '}
           <span style={{color:'#C2593A',fontWeight:'600',cursor:'pointer'}} onClick={() => navigate('/register')}>
