@@ -10,21 +10,12 @@ function ReportUpload() {
   const [error, setError] = useState('');
   const [dragOver, setDragOver] = useState(false);
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setStatus('idle');
-    setError('');
-  };
+  const handleFileChange = e => { setFile(e.target.files[0]); setStatus('idle'); setError(''); };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragOver(false);
-    const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
-      setFile(droppedFile);
-      setStatus('idle');
-      setError('');
-    }
+  const handleDrop = e => {
+    e.preventDefault(); setDragOver(false);
+    const f = e.dataTransfer.files[0];
+    if (f) { setFile(f); setStatus('idle'); setError(''); }
   };
 
   const handleUpload = async () => {
@@ -35,14 +26,11 @@ function ReportUpload() {
       const formData = new FormData();
       formData.append('report', file);
       const res = await API.post('/report/upload', formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
       });
       setExtractedParams(res.data.parameters);
       setStatus('done');
-    } catch (error) {
+    } catch {
       setError('Failed to process report. Please try again.');
       setStatus('idle');
     }
@@ -51,146 +39,81 @@ function ReportUpload() {
   const handleConfirm = async () => {
     try {
       const token = localStorage.getItem('token');
-      await API.post('/health/save', { parameters: extractedParams }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await API.post('/health/save', {parameters: extractedParams}, {headers:{Authorization:`Bearer ${token}`}});
       navigate('/dashboard');
-    } catch (error) {
-      setError('Failed to save data. Please try again.');
+    } catch {
+      setError('Failed to save. Please try again.');
     }
   };
 
   return (
-    <div className="min-h-screen"
-      style={{background:'linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 50%, #0a1628 100%)'}}>
-
+    <div style={{minHeight:'100vh',background:'#FEFAF5',fontFamily:"'Inter',system-ui,sans-serif",color:'#1E2A2E'}}>
       <style>{`
-        @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        * { box-sizing:border-box; }
+        .drop-zone {
+          border:2px dashed #D9CFC2; border-radius:24px;
+          padding:48px; text-align:center; cursor:pointer;
+          transition:all 0.2s;
+        }
+        .drop-zone:hover, .drop-zone.over {
+          border-color:#2A5C4A; background:#F0F4EC;
+        }
         @keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-        @keyframes progressBar{from{width:0%}to{width:85%}}
-        .slide-up{animation:slideUp 0.6s ease forwards}
-        .slide-up-1{animation:slideUp 0.6s ease 0.1s forwards;opacity:0}
-        .slide-up-2{animation:slideUp 0.6s ease 0.2s forwards;opacity:0}
-        .glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08)}
-        .drop-zone{
-          border:2px dashed rgba(20,184,166,0.3);
-          border-radius:20px;padding:48px;
-          text-align:center;
-          transition:all 0.3s ease;
-          cursor:pointer;
-        }
-        .drop-zone:hover,.drop-zone.drag-over{
-          border-color:rgba(20,184,166,0.6);
-          background:rgba(20,184,166,0.05);
-          box-shadow:0 0 30px rgba(20,184,166,0.1);
-        }
-        .btn-upload{
-          width:100%;
-          background:linear-gradient(135deg,#14b8a6,#3b82f6);
-          color:white;font-weight:700;
-          padding:16px;border-radius:14px;
-          border:none;cursor:pointer;font-size:16px;
-          transition:all 0.3s ease;
-          box-shadow:0 0 30px rgba(20,184,166,0.3);
-        }
-        .btn-upload:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(20,184,166,0.5)}
-        .btn-upload:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-        .btn-confirm{
-          width:100%;
-          background:linear-gradient(135deg,#14b8a6,#3b82f6);
-          color:white;font-weight:700;
-          padding:16px;border-radius:14px;
-          border:none;cursor:pointer;font-size:16px;
-          transition:all 0.3s ease;
-          box-shadow:0 0 30px rgba(20,184,166,0.3);
-        }
-        .btn-confirm:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(20,184,166,0.5)}
-        .progress-bar{
-          height:6px;border-radius:3px;
-          background:rgba(255,255,255,0.06);
-          overflow:hidden;margin-bottom:16px;
-        }
-        .progress-fill{
-          height:100%;border-radius:3px;
-          background:linear-gradient(90deg,#14b8a6,#3b82f6);
-          animation:progressBar 2.5s ease forwards;
-          box-shadow:0 0 10px rgba(20,184,166,0.5);
-        }
       `}</style>
 
-      {/* Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20"
-          style={{background:'radial-gradient(circle,rgba(20,184,166,0.5),transparent)',animation:'float1 10s ease-in-out infinite'}}></div>
-        <div className="absolute inset-0"
-          style={{backgroundImage:'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)',backgroundSize:'50px 50px'}}></div>
-      </div>
-
-      {/* Navbar */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-4"
-        style={{background:'rgba(10,15,30,0.8)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-sm"
-            style={{background:'linear-gradient(135deg,#14b8a6,#8b5cf6)'}}>H</div>
-          <span className="text-lg font-black text-white">Health<span style={{color:'#14b8a6'}}>Genix</span></span>
+      {/* NAV */}
+      <nav style={{background:'rgba(254,250,245,0.92)',backdropFilter:'blur(16px)',borderBottom:'1px solid #ECE3D8',padding:'0 40px',height:'68px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:50}}>
+        <div style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}} onClick={() => navigate('/')}>
+          <div style={{width:'38px',height:'38px',background:'#2A5C4A',borderRadius:'12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'800',fontSize:'16px'}}>H</div>
+          <span style={{fontSize:'18px',fontWeight:'800',color:'#1F2F2C'}}>Health<span style={{color:'#C2593A'}}>Genix</span></span>
         </div>
         <button onClick={() => navigate('/dashboard')}
-          className="text-gray-400 hover:text-white text-sm transition-colors">
+          style={{background:'none',border:'none',color:'#8F9B96',cursor:'pointer',fontSize:'14px',fontWeight:'500'}}>
           ← Back to Dashboard
         </button>
       </nav>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-8">
-
-        {/* Header */}
-        <div className="slide-up mb-8">
-          <h1 className="text-3xl font-black text-white mb-2">Upload Medical Report</h1>
-          <p className="text-gray-500 text-sm">Upload your past blood reports or lab results. AI will automatically extract your health parameters.</p>
+      <div style={{maxWidth:'680px',margin:'0 auto',padding:'40px'}}>
+        <div style={{marginBottom:'32px'}}>
+          <div style={{fontSize:'13px',fontWeight:'600',color:'#C2593A',marginBottom:'8px'}}>— report scanner</div>
+          <h1 style={{fontSize:'32px',fontWeight:'800',color:'#1F2F2C',letterSpacing:'-1px',marginBottom:'8px'}}>Upload Medical Report</h1>
+          <p style={{color:'#8F9B96',fontSize:'14px'}}>Upload your blood reports or lab results. AI will extract your health parameters automatically.</p>
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="mb-4 p-4 rounded-xl text-sm"
-            style={{background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.2)',color:'#f87171'}}>
+          <div style={{background:'#FEF2F2',border:'1px solid #FECACA',borderRadius:'12px',padding:'14px 16px',marginBottom:'20px',fontSize:'13px',color:'#DC2626'}}>
             {error}
           </div>
         )}
 
         {/* Upload Zone */}
         {status === 'idle' && (
-          <div className="slide-up-1">
-            <div
-              className={`drop-zone mb-6 ${dragOver ? 'drag-over' : ''}`}
-              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+          <div>
+            <div className={`drop-zone ${dragOver ? 'over' : ''}`}
+              onDragOver={e => {e.preventDefault();setDragOver(true)}}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => document.getElementById('file-input').click()}>
-              <div className="text-6xl mb-4">📄</div>
-              <h3 className="text-white font-bold text-xl mb-2">Drop your report here</h3>
-              <p className="text-gray-500 text-sm mb-4">or click to browse files</p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium"
-                style={{background:'rgba(20,184,166,0.1)',border:'1px solid rgba(20,184,166,0.3)',color:'#14b8a6'}}>
-                Supports PDF files
-              </div>
-              <input type="file" accept=".pdf" onChange={handleFileChange}
-                className="hidden" id="file-input"/>
+              <div style={{fontSize:'48px',marginBottom:'16px'}}>📄</div>
+              <h3 style={{fontSize:'18px',fontWeight:'700',color:'#1F2F2C',marginBottom:'8px'}}>Drop your report here</h3>
+              <p style={{color:'#8F9B96',fontSize:'14px',marginBottom:'16px'}}>or click to browse files</p>
+              <span style={{display:'inline-block',background:'#F1EAE1',borderRadius:'60px',padding:'6px 16px',fontSize:'12px',fontWeight:'600',color:'#A55639'}}>PDF files supported</span>
+              <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="file-input" style={{display:'none'}}/>
             </div>
 
             {file && (
-              <div className="flex items-center gap-3 p-4 rounded-xl mb-4"
-                style={{background:'rgba(20,184,166,0.08)',border:'1px solid rgba(20,184,166,0.2)'}}>
-                <span className="text-2xl">📄</span>
-                <div className="flex-1">
-                  <div className="text-white text-sm font-medium">{file.name}</div>
-                  <div className="text-gray-500 text-xs">{(file.size / 1024).toFixed(1)} KB</div>
+              <div style={{display:'flex',alignItems:'center',gap:'12px',padding:'16px',borderRadius:'16px',background:'#F0F4EC',border:'1px solid #D4E4D0',marginTop:'16px',marginBottom:'16px'}}>
+                <span style={{fontSize:'24px'}}>📄</span>
+                <div style={{flex:1}}>
+                  <div style={{fontWeight:'600',color:'#1F2F2C',fontSize:'14px'}}>{file.name}</div>
+                  <div style={{fontSize:'12px',color:'#8F9B96'}}>{(file.size/1024).toFixed(1)} KB</div>
                 </div>
-                <span style={{color:'#14b8a6'}}>✓</span>
+                <span style={{color:'#2A5C4A',fontWeight:'600',fontSize:'13px'}}>✓ Ready</span>
               </div>
             )}
 
-            <button className="btn-upload" onClick={handleUpload} disabled={!file}>
+            <button onClick={handleUpload} disabled={!file}
+              style={{width:'100%',background:file?'#C2593A':'#D9CFC2',color:file?'white':'#8F9B96',fontWeight:'600',padding:'16px',borderRadius:'60px',border:'none',cursor:file?'pointer':'not-allowed',fontSize:'15px',transition:'all 0.25s',marginTop:'8px',fontFamily:"'Inter',sans-serif"}}>
               Upload & Analyse Report →
             </button>
           </div>
@@ -198,88 +121,65 @@ function ReportUpload() {
 
         {/* Processing */}
         {status === 'processing' && (
-          <div className="slide-up glass rounded-2xl p-8 text-center mb-6">
-            <div className="w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center"
-              style={{background:'rgba(20,184,166,0.1)',border:'1px solid rgba(20,184,166,0.3)'}}>
-              <svg style={{animation:'spin 1s linear infinite'}} className="w-8 h-8" viewBox="0 0 24 24" fill="none">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#14b8a6" strokeWidth="4"/>
-                <path className="opacity-75" fill="#14b8a6" d="M4 12a8 8 0 018-8v8z"/>
-              </svg>
-            </div>
-            <h3 className="text-white font-black text-xl mb-2">Reading your report...</h3>
-            <p className="text-gray-500 text-sm mb-6">Our AI is extracting your health parameters</p>
-            <div className="progress-bar">
-              <div className="progress-fill"></div>
-            </div>
-            <div className="flex flex-col gap-2 text-left max-w-xs mx-auto">
-              <div className="flex items-center gap-2 text-sm" style={{color:'#22c55e'}}>
-                <span>✓</span> Document detected
-              </div>
-              <div className="flex items-center gap-2 text-sm" style={{color:'#22c55e'}}>
-                <span>✓</span> Text extracted
-              </div>
-              <div className="flex items-center gap-2 text-sm" style={{color:'#14b8a6'}}>
-                <span className="animate-pulse">⟳</span> Identifying parameters...
-              </div>
+          <div style={{background:'white',borderRadius:'24px',padding:'48px',textAlign:'center',border:'1px solid #EFE6DC'}}>
+            <div style={{width:'56px',height:'56px',border:'3px solid #EFE6DC',borderTopColor:'#C2593A',borderRadius:'50%',animation:'spin 1s linear infinite',margin:'0 auto 24px'}}></div>
+            <h3 style={{fontSize:'20px',fontWeight:'800',color:'#1F2F2C',marginBottom:'8px'}}>Reading your report...</h3>
+            <p style={{color:'#8F9B96',fontSize:'14px',marginBottom:'24px'}}>AI is extracting your health parameters</p>
+            <div style={{display:'flex',flexDirection:'column',gap:'8px',maxWidth:'240px',margin:'0 auto',textAlign:'left'}}>
+              {['✓ Document detected','✓ Text extracted','⟳ Identifying parameters...'].map((s,i) => (
+                <div key={i} style={{fontSize:'13px',color:i<2?'#2A5C4A':'#C2593A',fontWeight:'500'}}>{s}</div>
+              ))}
             </div>
           </div>
         )}
 
         {/* Done */}
         {status === 'done' && (
-          <div className="slide-up">
-            <div className="glass rounded-2xl p-6 mb-6">
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl" style={{color:'#8b5cf6'}}>✦</span>
-                <h3 className="text-white font-black text-xl">
-                  {extractedParams.length > 0
-                    ? `We found ${extractedParams.length} values!`
-                    : 'No parameters found'}
-                </h3>
-              </div>
-
-              {extractedParams.length > 0 ? (
-                <>
-                  <div className="flex flex-col gap-3 mb-6">
-                    {extractedParams.map((param, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-xl"
-                        style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.06)'}}>
-                        <span className="text-gray-300 text-sm capitalize">
-                          {param.name.replace(/_/g, ' ')}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          <span className="text-white font-mono text-sm font-bold">
-                            {param.value} {param.unit}
-                          </span>
-                          <span style={{color:'#22c55e'}}>✓</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button className="btn-confirm" onClick={handleConfirm}>
-                    Confirm & Analyse →
-                  </button>
-                </>
-              ) : (
-                <div className="text-center py-6">
-                  <div className="text-5xl mb-4">🔍</div>
-                  <p className="text-gray-400 mb-2">No health parameters found in this report.</p>
-                  <p className="text-gray-600 text-xs mb-6">Try uploading a blood test or lab report with numeric values.</p>
-                  <button onClick={() => setStatus('idle')}
-                    className="px-6 py-3 rounded-xl font-medium text-sm transition-all duration-300"
-                    style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',color:'white'}}>
-                    Try Another File
-                  </button>
-                </div>
-              )}
+          <div style={{background:'white',borderRadius:'24px',padding:'28px',border:'1px solid #EFE6DC'}}>
+            <div style={{marginBottom:'20px'}}>
+              <div style={{fontSize:'13px',fontWeight:'700',color:'#C2593A',marginBottom:'6px'}}>— SCAN COMPLETE</div>
+              <h3 style={{fontSize:'22px',fontWeight:'800',color:'#1F2F2C'}}>
+                {extractedParams.length > 0 ? `Found ${extractedParams.length} health values!` : 'No parameters found'}
+              </h3>
             </div>
+
+            {extractedParams.length > 0 ? (
+              <>
+                <div style={{display:'flex',flexDirection:'column',gap:'10px',marginBottom:'24px'}}>
+                  {extractedParams.map((param,i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'12px 16px',borderRadius:'12px',background:'#F0F4EC',border:'1px solid #D4E4D0'}}>
+                      <span style={{fontSize:'14px',color:'#4A5B5E',fontWeight:'500',textTransform:'capitalize'}}>
+                        {param.name.replace(/_/g,' ')}
+                      </span>
+                      <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
+                        <span style={{fontWeight:'700',fontSize:'14px',color:'#1F2F2C'}}>{param.value} {param.unit}</span>
+                        <span style={{color:'#2A5C4A',fontWeight:'600'}}>✓</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button onClick={handleConfirm}
+                  style={{width:'100%',background:'#2A5C4A',color:'white',fontWeight:'600',padding:'16px',borderRadius:'60px',border:'none',cursor:'pointer',fontSize:'15px',fontFamily:"'Inter',sans-serif"}}>
+                  Confirm & Analyse →
+                </button>
+              </>
+            ) : (
+              <div style={{textAlign:'center',padding:'24px 0'}}>
+                <div style={{fontSize:'48px',marginBottom:'12px'}}>🔍</div>
+                <p style={{color:'#8F9B96',fontSize:'14px',marginBottom:'20px'}}>No health parameters found. Try uploading a blood test or lab report with numeric values.</p>
+                <button onClick={() => setStatus('idle')}
+                  style={{background:'#F1EAE1',color:'#A55639',fontWeight:'600',padding:'12px 24px',borderRadius:'60px',border:'none',cursor:'pointer',fontSize:'14px',fontFamily:"'Inter',sans-serif"}}>
+                  Try another file
+                </button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Supported Reports */}
-        <div className="slide-up-2 glass rounded-2xl p-5">
-          <h4 className="text-gray-400 text-xs font-bold mb-4 tracking-widest uppercase">Supported Report Types</h4>
-          <div className="grid grid-cols-2 gap-3">
+        {/* Supported types */}
+        <div style={{background:'white',borderRadius:'20px',padding:'20px',border:'1px solid #EFE6DC',marginTop:'20px'}}>
+          <div style={{fontSize:'11px',fontWeight:'700',color:'#C2593A',letterSpacing:'1px',marginBottom:'14px'}}>SUPPORTED REPORT TYPES</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
             {[
               {icon:'🩸',name:'Blood Test (CBC)'},
               {icon:'🫀',name:'Lipid Profile'},
@@ -288,14 +188,12 @@ function ReportUpload() {
               {icon:'🫁',name:'Kidney Function'},
               {icon:'🦋',name:'Thyroid Profile'},
             ].map((item,i) => (
-              <div key={i} className="flex items-center gap-2 text-gray-400 text-xs">
-                <span>{item.icon}</span>
-                <span>{item.name}</span>
+              <div key={i} style={{display:'flex',alignItems:'center',gap:'8px',fontSize:'13px',color:'#4A5B5E'}}>
+                <span>{item.icon}</span><span>{item.name}</span>
               </div>
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -7,267 +7,182 @@ function HealthInput() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    height: '', weight: '',
-    systolic_bp: '', diastolic_bp: '',
-    heart_rate: '', cholesterol: '',
-    fasting_glucose: '', hba1c: '',
-    sleep_hours: '', exercise_days: '',
-    stress_level: '', smoking: ''
+    height:'', weight:'', systolic_bp:'', diastolic_bp:'',
+    heart_rate:'', cholesterol:'', fasting_glucose:'', hba1c:'',
+    sleep_hours:'', exercise_days:'', stress_level:'', smoking:''
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = e => setFormData({...formData, [e.target.name]: e.target.value});
 
   const handleSubmit = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       const parameters = [];
-
       if (formData.height && formData.weight) {
-        const bmi = (formData.weight / ((formData.height / 100) ** 2)).toFixed(1);
-        parameters.push({ name: 'bmi', value: parseFloat(bmi), unit: 'kg/m2' });
+        const bmi = (formData.weight / ((formData.height/100)**2)).toFixed(1);
+        parameters.push({name:'bmi', value:parseFloat(bmi), unit:'kg/m2'});
       }
-      if (formData.systolic_bp) parameters.push({ name: 'systolic_bp', value: parseFloat(formData.systolic_bp), unit: 'mmHg' });
-      if (formData.cholesterol) parameters.push({ name: 'cholesterol', value: parseFloat(formData.cholesterol), unit: 'mg/dL' });
-      if (formData.fasting_glucose) parameters.push({ name: 'fasting_glucose', value: parseFloat(formData.fasting_glucose), unit: 'mg/dL' });
-      if (formData.sleep_hours) parameters.push({ name: 'sleep_hours', value: parseFloat(formData.sleep_hours), unit: 'hours' });
-      if (formData.exercise_days) parameters.push({ name: 'exercise_days', value: parseFloat(formData.exercise_days), unit: 'days/week' });
-      if (formData.stress_level) parameters.push({ name: 'stress_level', value: parseFloat(formData.stress_level), unit: 'scale' });
-
-      await API.post('/health/save', { parameters }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
+      if (formData.systolic_bp) parameters.push({name:'systolic_bp', value:parseFloat(formData.systolic_bp), unit:'mmHg'});
+      if (formData.cholesterol) parameters.push({name:'cholesterol', value:parseFloat(formData.cholesterol), unit:'mg/dL'});
+      if (formData.fasting_glucose) parameters.push({name:'fasting_glucose', value:parseFloat(formData.fasting_glucose), unit:'mg/dL'});
+      if (formData.sleep_hours) parameters.push({name:'sleep_hours', value:parseFloat(formData.sleep_hours), unit:'hours'});
+      if (formData.exercise_days) parameters.push({name:'exercise_days', value:parseFloat(formData.exercise_days), unit:'days/week'});
+      if (formData.stress_level) parameters.push({name:'stress_level', value:parseFloat(formData.stress_level), unit:'scale'});
+      await API.post('/health/save', {parameters}, {headers:{Authorization:`Bearer ${token}`}});
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 1500);
-
     } catch (error) {
-      console.error('Error saving health data:', error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen"
-      style={{background:'linear-gradient(135deg, #0a0f1e 0%, #0d1b2a 50%, #0a1628 100%)'}}>
-
+    <div style={{minHeight:'100vh',background:'#FEFAF5',fontFamily:"'Inter',system-ui,sans-serif",color:'#1E2A2E'}}>
       <style>{`
-        @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
-        @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes successPop{0%{transform:scale(0.8);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
-        .slide-up{animation:slideUp 0.6s ease forwards}
-        .slide-up-1{animation:slideUp 0.6s ease 0.1s forwards;opacity:0}
-        .slide-up-2{animation:slideUp 0.6s ease 0.2s forwards;opacity:0}
-        .slide-up-3{animation:slideUp 0.6s ease 0.3s forwards;opacity:0}
-        .slide-up-4{animation:slideUp 0.6s ease 0.4s forwards;opacity:0}
-        .glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08)}
-        .input-field{
-          width:100%;background:rgba(255,255,255,0.04);
-          border:1px solid rgba(255,255,255,0.08);
-          border-radius:12px;padding:12px 16px;
-          color:white;font-size:14px;outline:none;
-          transition:all 0.3s ease;
+        * { box-sizing:border-box; }
+        .input-field {
+          width:100%; background:white;
+          border:1.5px solid #E8DDD0; border-radius:12px;
+          padding:12px 16px; color:#1E2A2E; font-size:14px;
+          outline:none; transition:all 0.2s; font-family:'Inter',sans-serif;
         }
-        .input-field:focus{
-          border-color:rgba(20,184,166,0.6);
-          background:rgba(20,184,166,0.06);
-          box-shadow:0 0 20px rgba(20,184,166,0.15);
-        }
-        .input-field::placeholder{color:rgba(255,255,255,0.2)}
-        .section-card{
-          background:rgba(255,255,255,0.04);
-          backdrop-filter:blur(20px);
-          border:1px solid rgba(255,255,255,0.08);
-          border-radius:20px;
-          padding:24px;
-          margin-bottom:20px;
-        }
-        .section-title{
-          font-size:14px;font-weight:700;
-          margin-bottom:16px;
-          display:flex;align-items:center;gap:8px;
-        }
-        .btn-submit{
-          width:100%;
-          background:linear-gradient(135deg,#14b8a6,#3b82f6);
-          color:white;font-weight:700;
-          padding:16px;border-radius:14px;
-          border:none;cursor:pointer;font-size:16px;
-          transition:all 0.3s ease;
-          box-shadow:0 0 30px rgba(20,184,166,0.3);
-        }
-        .btn-submit:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(20,184,166,0.5)}
-        .btn-submit:active{transform:scale(0.98)}
-        .btn-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none}
-        .success-overlay{
-          position:fixed;inset:0;
-          background:rgba(10,15,30,0.9);
-          display:flex;align-items:center;justify-content:center;
-          z-index:100;
-          animation:fadeIn 0.3s ease;
-        }
-        .success-card{animation:successPop 0.5s ease forwards}
-        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        .input-field:focus { border-color:#2A5C4A; box-shadow:0 0 0 3px rgba(42,92,74,0.08); }
+        .input-field::placeholder { color:#B2A692; }
+        label { font-size:12px; font-weight:600; color:#4A5B5E; margin-bottom:6px; display:block; letter-spacing:0.3px; }
+        .section-box { background:white; border-radius:24px; padding:28px; border:1px solid #EFE6DC; margin-bottom:20px; }
+        .section-header { display:flex; align-items:center; gap:8px; margin-bottom:20px; }
+        .section-label { font-size:13px; font-weight:700; color:#C2593A; }
+        @keyframes successPop { 0%{transform:scale(0.8);opacity:0} 60%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
       `}</style>
 
       {/* Success overlay */}
       {success && (
-        <div className="success-overlay">
-          <div className="success-card text-center">
-            <div className="text-8xl mb-4">🎉</div>
-            <h2 className="text-3xl font-black text-white mb-2">Analysis Complete!</h2>
-            <p className="text-gray-400">Redirecting to your dashboard...</p>
+        <div style={{position:'fixed',inset:0,background:'rgba(254,250,245,0.95)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:100}}>
+          <div style={{textAlign:'center',animation:'successPop 0.5s ease forwards'}}>
+            <div style={{fontSize:'72px',marginBottom:'16px'}}>🎉</div>
+            <h2 style={{fontSize:'28px',fontWeight:'800',color:'#1F2F2C',marginBottom:'8px'}}>Analysis Complete!</h2>
+            <p style={{color:'#8F9B96'}}>Redirecting to your dashboard...</p>
           </div>
         </div>
       )}
 
-      {/* Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full opacity-20"
-          style={{background:'radial-gradient(circle,rgba(20,184,166,0.5),transparent)',animation:'float1 10s ease-in-out infinite'}}></div>
-        <div className="absolute inset-0"
-          style={{backgroundImage:'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)',backgroundSize:'50px 50px'}}></div>
-      </div>
-
-      {/* Navbar */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-4"
-        style={{background:'rgba(10,15,30,0.8)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-white text-sm"
-            style={{background:'linear-gradient(135deg,#14b8a6,#8b5cf6)'}}>H</div>
-          <span className="text-lg font-black text-white">Health<span style={{color:'#14b8a6'}}>Genix</span></span>
+      {/* NAV */}
+      <nav style={{background:'rgba(254,250,245,0.92)',backdropFilter:'blur(16px)',borderBottom:'1px solid #ECE3D8',padding:'0 40px',height:'68px',display:'flex',alignItems:'center',justifyContent:'space-between',position:'sticky',top:0,zIndex:50}}>
+        <div style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}} onClick={() => navigate('/')}>
+          <div style={{width:'38px',height:'38px',background:'#2A5C4A',borderRadius:'12px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontWeight:'800',fontSize:'16px'}}>H</div>
+          <span style={{fontSize:'18px',fontWeight:'800',color:'#1F2F2C'}}>Health<span style={{color:'#C2593A'}}>Genix</span></span>
         </div>
         <button onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors">
+          style={{background:'none',border:'none',color:'#8F9B96',cursor:'pointer',fontSize:'14px',fontWeight:'500',display:'flex',alignItems:'center',gap:'6px'}}>
           ← Back to Dashboard
         </button>
       </nav>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-8">
-
-        {/* Header */}
-        <div className="slide-up mb-8">
-          <h1 className="text-3xl font-black text-white mb-2">Health Parameters</h1>
-          <p className="text-gray-500 text-sm">Enter your latest health data for accurate AI predictions</p>
+      <div style={{maxWidth:'680px',margin:'0 auto',padding:'40px'}}>
+        <div style={{marginBottom:'32px'}}>
+          <div style={{fontSize:'13px',fontWeight:'600',color:'#C2593A',marginBottom:'8px'}}>— health parameters</div>
+          <h1 style={{fontSize:'32px',fontWeight:'800',color:'#1F2F2C',letterSpacing:'-1px',marginBottom:'8px'}}>Add your health data</h1>
+          <p style={{color:'#8F9B96',fontSize:'14px'}}>Enter your latest measurements for accurate AI risk predictions</p>
         </div>
 
         {/* Basic Info */}
-        <div className="slide-up-1 section-card">
-          <div className="section-title" style={{color:'#14b8a6'}}>
-            <span>📋</span> Basic Information
+        <div className="section-box">
+          <div className="section-header">
+            <span>📋</span>
+            <span className="section-label">BASIC INFORMATION</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Height (cm)</label>
-              <input type="number" name="height" className="input-field"
-                placeholder="e.g. 170" value={formData.height} onChange={handleChange}/>
+              <label>Height (cm)</label>
+              <input type="number" name="height" className="input-field" placeholder="e.g. 170" value={formData.height} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Weight (kg)</label>
-              <input type="number" name="weight" className="input-field"
-                placeholder="e.g. 70" value={formData.weight} onChange={handleChange}/>
+              <label>Weight (kg)</label>
+              <input type="number" name="weight" className="input-field" placeholder="e.g. 70" value={formData.weight} onChange={handleChange}/>
             </div>
           </div>
           {formData.height && formData.weight && (
-            <div className="mt-3 p-3 rounded-xl text-sm font-medium"
-              style={{background:'rgba(20,184,166,0.08)',border:'1px solid rgba(20,184,166,0.2)',color:'#14b8a6'}}>
-              BMI: {(formData.weight / ((formData.height / 100) ** 2)).toFixed(1)} kg/m²
+            <div style={{marginTop:'14px',padding:'12px 16px',borderRadius:'12px',background:'#F0F4EC',border:'1px solid #D4E4D0',fontSize:'13px',fontWeight:'600',color:'#2A5C4A'}}>
+              ✓ BMI: {(formData.weight/((formData.height/100)**2)).toFixed(1)} kg/m²
             </div>
           )}
         </div>
 
         {/* Cardiovascular */}
-        <div className="slide-up-2 section-card">
-          <div className="section-title" style={{color:'#ef4444'}}>
-            <span>🫀</span> Cardiovascular
+        <div className="section-box">
+          <div className="section-header">
+            <span>🫀</span>
+            <span className="section-label">CARDIOVASCULAR</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Systolic BP (mmHg)</label>
-              <input type="number" name="systolic_bp" className="input-field"
-                placeholder="e.g. 120" value={formData.systolic_bp} onChange={handleChange}/>
+              <label>Systolic BP (mmHg)</label>
+              <input type="number" name="systolic_bp" className="input-field" placeholder="e.g. 120" value={formData.systolic_bp} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Cholesterol (mg/dL)</label>
-              <input type="number" name="cholesterol" className="input-field"
-                placeholder="e.g. 180" value={formData.cholesterol} onChange={handleChange}/>
+              <label>Cholesterol (mg/dL)</label>
+              <input type="number" name="cholesterol" className="input-field" placeholder="e.g. 180" value={formData.cholesterol} onChange={handleChange}/>
             </div>
           </div>
         </div>
 
         {/* Metabolic */}
-        <div className="slide-up-2 section-card">
-          <div className="section-title" style={{color:'#f59e0b'}}>
-            <span>🩸</span> Metabolic
+        <div className="section-box">
+          <div className="section-header">
+            <span>🩸</span>
+            <span className="section-label">METABOLIC</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Fasting Glucose (mg/dL)</label>
-              <input type="number" name="fasting_glucose" className="input-field"
-                placeholder="e.g. 95" value={formData.fasting_glucose} onChange={handleChange}/>
+              <label>Fasting Glucose (mg/dL)</label>
+              <input type="number" name="fasting_glucose" className="input-field" placeholder="e.g. 95" value={formData.fasting_glucose} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">HbA1c (%)</label>
-              <input type="number" name="hba1c" className="input-field"
-                placeholder="e.g. 5.4" value={formData.hba1c} onChange={handleChange}/>
+              <label>HbA1c (%)</label>
+              <input type="number" name="hba1c" className="input-field" placeholder="e.g. 5.4" value={formData.hba1c} onChange={handleChange}/>
             </div>
           </div>
         </div>
 
         {/* Lifestyle */}
-        <div className="slide-up-3 section-card">
-          <div className="section-title" style={{color:'#22c55e'}}>
-            <span>🏃</span> Lifestyle
+        <div className="section-box">
+          <div className="section-header">
+            <span>🏃</span>
+            <span className="section-label">LIFESTYLE</span>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Sleep Hours/night</label>
-              <input type="number" name="sleep_hours" className="input-field"
-                placeholder="e.g. 7" value={formData.sleep_hours} onChange={handleChange}/>
+              <label>Sleep Hours/night</label>
+              <input type="number" name="sleep_hours" className="input-field" placeholder="e.g. 7" value={formData.sleep_hours} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Exercise (days/week)</label>
-              <input type="number" name="exercise_days" className="input-field"
-                placeholder="e.g. 3" value={formData.exercise_days} onChange={handleChange}/>
+              <label>Exercise (days/week)</label>
+              <input type="number" name="exercise_days" className="input-field" placeholder="e.g. 3" value={formData.exercise_days} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Stress Level (1-10)</label>
-              <input type="number" name="stress_level" className="input-field"
-                placeholder="e.g. 5" value={formData.stress_level} onChange={handleChange}/>
+              <label>Stress Level (1-10)</label>
+              <input type="number" name="stress_level" className="input-field" placeholder="e.g. 5" value={formData.stress_level} onChange={handleChange}/>
             </div>
             <div>
-              <label className="text-gray-500 text-xs font-medium mb-2 block tracking-widest uppercase">Smoking</label>
-              <select name="smoking" className="input-field"
-                value={formData.smoking} onChange={handleChange}
-                style={{background:'rgba(255,255,255,0.04)'}}>
-                <option value="" style={{background:'#0d1b2a'}}>Select</option>
-                <option value="never" style={{background:'#0d1b2a'}}>Never</option>
-                <option value="former" style={{background:'#0d1b2a'}}>Former</option>
-                <option value="current" style={{background:'#0d1b2a'}}>Current</option>
+              <label>Smoking</label>
+              <select name="smoking" className="input-field" value={formData.smoking} onChange={handleChange} style={{background:'white'}}>
+                <option value="">Select</option>
+                <option value="never">Never</option>
+                <option value="former">Former</option>
+                <option value="current">Current</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Submit */}
-        <div className="slide-up-4">
-          <button className="btn-submit" onClick={handleSubmit} disabled={loading}>
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4"/>
-                  <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"/>
-                </svg>
-                Analysing your health...
-              </span>
-            ) : 'Analyse My Health →'}
-          </button>
-        </div>
-
+        <button onClick={handleSubmit} disabled={loading}
+          style={{width:'100%',background:'#C2593A',color:'white',fontWeight:'600',padding:'16px',borderRadius:'60px',border:'none',cursor:'pointer',fontSize:'16px',transition:'all 0.25s',boxShadow:'0 4px 12px rgba(194,89,58,0.25)',opacity:loading?0.7:1,fontFamily:"'Inter',sans-serif"}}>
+          {loading ? 'Analysing your health...' : 'Analyse my health →'}
+        </button>
       </div>
     </div>
   );
